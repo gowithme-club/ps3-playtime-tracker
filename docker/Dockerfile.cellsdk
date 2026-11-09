@@ -1,0 +1,37 @@
+# Окружение для сборки VSH-плагина.
+#
+# Компилятор Cell SDK существует только как win32-бинарь (PE32 i386), поэтому
+# он запускается под Wine. Сам SDK в образ НЕ кладётся — он проприетарный
+# и подключается томом, см. docs/DEVELOPMENT.ru.md.
+#
+# ВАЖНО: образ обязан выполняться на настоящем x86_64, а не под user-mode
+# эмуляцией. У ppu-lv2-gcc.exe вырезаны релокации, он грузится строго по
+# ImageBase=0x400000, и под эмуляцией этот адрес занят самим эмулятором —
+# wine падает с STATUS_CONFLICTING_ADDRESSES (c0000018).
+#
+# На Apple Silicon это решается полноценной x86_64-виртуалкой (colima --arch
+# x86_64): гостевое ядро распоряжается адресным пространством само, и коллизии
+# нет. См. docs/DEVELOPMENT.ru.md, раздел «Билд-хост».
+FROM --platform=linux/amd64 debian:trixie-slim
+
+# wine32 приносит 32-битные PE-библиотеки (i386-windows/ntdll.dll и прочие),
+# без них 64-битный wine не запускает PE32 вообще.
+RUN dpkg --add-architecture i386 \
+	&& apt-get update && apt-get install -y --no-install-recommends \
+		wine wine32:i386 make ca-certificates \
+	&& rm -rf /var/lib/apt/lists/*
+
+ENV WINEDEBUG=-all \
+	WINEPREFIX=/wine \
+	XDG_RUNTIME_DIR=/tmp \
+	CELL_SDK=/opt/cell \
+	CELL_SDK_WIN=/opt/cell-win
+
+RUN wineboot --init 2>/dev/null; true
+
+COPY cellsdk-entrypoint.sh /usr/local/bin/cellsdk-entrypoint
+RUN chmod +x /usr/local/bin/cellsdk-entrypoint
+
+WORKDIR /src
+ENTRYPOINT ["/usr/local/bin/cellsdk-entrypoint"]
+CMD ["/bin/bash"]
