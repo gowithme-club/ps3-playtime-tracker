@@ -37,35 +37,14 @@ static char gwm_hb_body[GWM_RECORD_MAX];
  * На диск сессии ложатся сырым временем консоли: в офлайне поправку взять
  * неоткуда — она приходит с заголовком Date, то есть только вместе с ответом
  * сервера. К моменту отправки поправка уже есть, и применить её надо в том
- * числе к сессиям недельной давности.
- *
- * Ширина метки фиксирована (20 символов), поэтому правка идёт на месте, без
- * пересборки строки и без разбора JSON: ищем имя поля, сдвигаем то, что за ним.
- * Случай «часы прыгнули, пока консоль стояла без сети» этим не лечится —
- * такой информации на консоли просто нет.
+ * числе к сессиям недельной давности. Случай «часы прыгнули, пока консоль
+ * стояла без сети» этим не лечится — такой информации на консоли просто нет.
  */
 static void gwm_batch_fix_times(char *buf, size_t len)
 {
-	static const char *keys[2] = { "\"startedAt\":\"", "\"endedAt\":\"" };
-	static const size_t key_len[2] = { 13, 11 };
+	if(!gwm_clock_synced) return;
 
-	if(!gwm_clock_synced || !gwm_clock_offset) return;
-
-	for(size_t i = 0; i < len; i++)
-	{
-		for(int k = 0; k < 2; k++)
-		{
-			size_t kl = key_len[k];
-
-			if(i + kl + GWM_ISO_LEN - 1 > len) continue;
-			if(gwm_strncmp(buf + i, keys[k], kl) != 0) continue;
-
-			gwm_iso_shift(buf + i + kl, gwm_clock_offset);
-
-			i += kl + GWM_ISO_LEN - 2; /* цикл добавит ещё единицу */
-			break;
-		}
-	}
+	gwm_times_shift(buf, len, gwm_clock_offset);
 }
 
 /* Склеивает строки очереди в {"sessions":[...]}.

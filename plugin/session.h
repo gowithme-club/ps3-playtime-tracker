@@ -25,6 +25,7 @@
 
 #include "record.h"
 #include "queue.h"
+#include "checkpoint.h"
 #include "account.h"
 
 typedef struct
@@ -63,34 +64,71 @@ static void gwm_session_init(gwm_session_t *s)
 	s->active = 0;
 }
 
-/* tick — сырой, как и start_tick. Обе метки уходят в очередь без поправки. */
-static void gwm_session_close(gwm_session_t *s, uint64_t tick)
+/* Строка очереди для сессии, закрытой на tick (сырой, как и start_tick),
+ * вместе с переводом строки. Без correct метки сырые — так их ждёт очередь;
+ * с ним поправлены, это нужно снимку (checkpoint.h). Длительность — всегда
+ * разность сырых тиков. */
+static size_t gwm_session_line(const gwm_session_t *s, uint64_t tick, int correct,
+                               char *line, size_t size)
 {
-	char line[GWM_RECORD_MAX];
 	char started_at[GWM_ISO_LEN];
 	char ended_at[GWM_ISO_LEN];
 
-	if(!s->active) return;
-
-	gwm_iso_from_tick(started_at, s->start_tick);
-	gwm_iso_from_tick(ended_at, tick);
+	gwm_iso_from_tick(started_at, correct ? gwm_tick_correct(s->start_tick) : s->start_tick);
+	gwm_iso_from_tick(ended_at, correct ? gwm_tick_correct(tick) : tick);
 
 	uint32_t seconds = (uint32_t)((tick - s->start_tick) / 1000000ULL);
 
-	/* Название может не определиться — тогда в сообщении хотя бы title id. */
-	gwm_copy_str(gwm_last_closed.title, sizeof(gwm_last_closed.title),
-	             s->title[0] ? s->title : s->title_id);
-	gwm_last_closed.seconds = seconds;
-	gwm_last_closed.valid = 1;
-
-	size_t len = gwm_build_session(line, sizeof(line) - 1, s->account,
+	size_t len = gwm_build_session(line, size - 1, s->account,
 	                               s->title_id, s->title,
 	                               started_at, ended_at, seconds);
 	line[len++] = '\n';
 
-	gwm_queue_append(line, len);
+	return len;
+}
+
+/* tick — сырой, как и start_tick. Обе метки уходят в очередь без поправки. */
+static void gwm_session_close(gwm_session_t *s, uint64_t tick)
+{
+	char line[GWM_RECORD_MAX];
+
+	if(!s->active) return;
+
+	/* Название может не определиться — тогда в сообщении хотя бы title id. */
+	gwm_copy_str(gwm_last_closed.title, sizeof(gwm_last_closed.title),
+	             s->title[0] ? s->title : s->title_id);
+	gwm_last_closed.seconds = (uint32_t)((tick - s->start_tick) / 1000000ULL);
+	gwm_last_closed.valid = 1;
+
+	gwm_queue_append(line, gwm_session_line(s, tick, 0, line, sizeof(line)));
+
+	/* Снимок удаляется после записи в очередь, не до: пропавшее между ними
+	 * питание даст сессию дважды с одним startedAt, а такой дубль сервер
+	 * отбрасывает сам. Наоборот — потерю. */
+	gwm_checkpoint_clear();
 
 	gwm_session_init(s);
+}
+
+/* Снимок открытой сессии, каждым циклом опроса (checkpoint.h). Пока не
+ * набежало и секунды, писать нечего: такая сессия серверу не нужна. */
+static void gwm_session_checkpoint(const gwm_session_t *s)
+{
+	if(!s->active) return;
+
+	uint64_t tick = gwm_tick_raw();
+
+	/* Часы переставили назад — разность тиков ушла бы в огромное число. */
+	if(tick < s->start_tick + 1000000ULL) return;
+
+	int correct = gwm_clock_synced;
+
+	gwm_checkpoint_buf[0] = correct ? GWM_CHECKPOINT_CORRECTED : GWM_CHECKPOINT_RAW;
+
+	size_t len = gwm_session_line(s, tick, correct,
+	                              gwm_checkpoint_buf + 1, GWM_RECORD_MAX);
+
+	gwm_checkpoint_write(gwm_checkpoint_buf, len + 1);
 }
 
 /* Вызывается на каждом опросе. Возвращает 1, если состояние изменилось. */

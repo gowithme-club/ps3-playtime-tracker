@@ -17,6 +17,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "str.h"
+
 /* "2026-07-05T18:30:00Z" + терминатор */
 #define GWM_ISO_LEN 21
 
@@ -166,6 +168,38 @@ static int gwm_iso_shift(char *iso, int64_t usec)
 	iso[GWM_ISO_LEN - 1] = after;
 
 	return 1;
+}
+
+/* Сдвигает на usec все метки startedAt и endedAt в куске строк сессий.
+ *
+ * Ширина метки фиксирована (20 символов), поэтому правка идёт на месте, без
+ * пересборки строки и без разбора JSON: ищем имя поля, сдвигаем то, что за ним.
+ * Обрезанная или мусорная метка остаётся как есть.
+ *
+ * Пользуются двое: отправка очереди (поправка часов к сырому времени,
+ * upload.h) и снимок открытой сессии (обратно в сырое время, checkpoint.h). */
+static void gwm_times_shift(char *buf, size_t len, int64_t usec)
+{
+	static const char *keys[2] = { "\"startedAt\":\"", "\"endedAt\":\"" };
+	static const size_t key_len[2] = { 13, 11 };
+
+	if(!usec) return;
+
+	for(size_t i = 0; i < len; i++)
+	{
+		for(int k = 0; k < 2; k++)
+		{
+			size_t kl = key_len[k];
+
+			if(i + kl + GWM_ISO_LEN - 1 > len) continue;
+			if(gwm_strncmp(buf + i, keys[k], kl) != 0) continue;
+
+			gwm_iso_shift(buf + i + kl, usec);
+
+			i += kl + GWM_ISO_LEN - 2; /* цикл добавит ещё единицу */
+			break;
+		}
+	}
 }
 
 #ifndef GWM_HOST_TEST

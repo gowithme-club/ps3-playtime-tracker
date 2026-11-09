@@ -38,30 +38,10 @@ static const struct { unsigned long long tick; const char *iso; } anchors[] = {
 	{ 63922513332000000ULL, "2026-08-16T21:42:12Z" },
 };
 
-/* Повторяет то, что делает gwm_batch_fix_times: без плагинных заголовков,
- * которые тянут за собой cellFs. Логика обязана совпадать построчно. */
+/* То же, что делает gwm_batch_fix_times с известной поправкой. */
 static void fix_times(char *buf, size_t len, long long offset)
 {
-	static const char *keys[2] = { "\"startedAt\":\"", "\"endedAt\":\"" };
-	static const size_t key_len[2] = { 13, 11 };
-
-	if(!offset) return;
-
-	for(size_t i = 0; i < len; i++)
-	{
-		for(int k = 0; k < 2; k++)
-		{
-			size_t kl = key_len[k];
-
-			if(i + kl + GWM_ISO_LEN - 1 > len) continue;
-			if(gwm_strncmp(buf + i, keys[k], kl) != 0) continue;
-
-			gwm_iso_shift(buf + i + kl, offset);
-
-			i += kl + GWM_ISO_LEN - 2;
-			break;
-		}
-	}
+	gwm_times_shift(buf, len, offset);
 }
 
 int main(void)

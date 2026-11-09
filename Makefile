@@ -41,6 +41,8 @@ test-host:
 	@/tmp/gwm_config_test
 	@cc -std=gnu99 -Wall -Wextra -Iplugin -o /tmp/gwm_autostart_test tests/autostart_test.c
 	@/tmp/gwm_autostart_test
+	@cc -std=gnu99 -Wall -Wextra -Iplugin -o /tmp/gwm_checkpoint_test tests/checkpoint_test.c
+	@/tmp/gwm_checkpoint_test
 
 # Стенд для сборки плагина: x86_64-виртуалка с wine и Cell SDK.
 vm:

@@ -41,7 +41,7 @@ make signing-tools   # scetool built from source into vendor/
 
 ## Tests
 
-`make test-host` compiles `tests/*.c` with plain `cc` and runs them on the workstation — game detect, record, HTTP, clock, trophy parsing, trophy cache, offline time, SHA-1, XMB message texts, `gwm.cfg` parsing, autostart line building. This is the only check that exists without a console, so when a bug is reproducible in pure logic, add a host test for it instead of spending a console run.
+`make test-host` compiles `tests/*.c` with plain `cc` and runs them on the workstation — game detect, record, HTTP, clock, trophy parsing, trophy cache, offline time, SHA-1, XMB message texts, `gwm.cfg` parsing, autostart line building, open-session snapshot parsing. This is the only check that exists without a console, so when a bug is reproducible in pure logic, add a host test for it instead of spending a console run.
 
 `tools/mock_ingest.py` is a stub server implementing the client contract; it answers `200` and prints every request. Point `gwm.cfg` at the workstation's IP and port to see exactly what the console sends.
 
@@ -55,6 +55,7 @@ What the plugin leaves on the console:
 
 - `/dev_hdd0/tmp/gwm/status.txt` — plugin state as `key = value` pairs, rewritten every cycle.
 - `/dev_hdd0/tmp/gwm/queue.jsonl` — the undelivered-events queue; it survives offline stretches and power-offs, and is cleared after a `200`.
+- `/dev_hdd0/tmp/gwm/open.jsonl` — the open session as a ready queue line, rewritten every cycle and removed on a normal close. Found at load, it means the console was switched off mid-game, and it goes to the queue ending at the last snapshot (`plugin/checkpoint.h`).
 - `/dev_hdd0/tmp/gwm/app.log` — the status app's own log (the app has no stdout and no debugger).
 - `/dev_hdd0/plugins/gwm.cfg` — token, optional explicit `account`, `popups`, `autostart`, host and port. Never commit a real token; the file is gitignored.
 - `/dev_hdd0/autoexec.bat` — **not the plugin's file.** It appends its own `loadprx` line there after the first `200`, so the install procedure no longer asks anyone to edit a system file by hand (`plugin/autostart.h`). Other plugins live in that file: append, never replace, do nothing if the line is already there, and leave a file too large for the buffer alone. `autostart = false` opts out — and is what stops the line coming back when someone removed it by hand after a crash.
