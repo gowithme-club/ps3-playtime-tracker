@@ -14,9 +14,9 @@ Alongside it, `app/` is an ordinary homebrew status screen (PSL1GHT, packaged as
 
 This plugin is one client of a server that owns all the domain logic — dedup, sessions, trophies, live status, dashboard. A client only forwards events over the ingest API; anything that changes server behaviour or the contract itself belongs in gwm-stats, not here.
 
-- gwm-stats — server, ingest endpoints, web dashboard, public read API. The contract is `docs/ingest-api-v1.md`, with a client-author version at `docs/ingest-api-v1-client.md`.
+- [server](https://github.com/gowithme-club/server) (formerly gwm-stats) — ingest endpoints, web dashboard, public read API. The contract is `docs/ingest-api-v1.md`, with a client-author version at `docs/ingest-api-v1-client.md`.
 - [switch-playtime-tracker](https://github.com/gowithme-club/switch-playtime-tracker) — Atmosphere sysmodule for a CFW Switch, a second client of the same ingest API. Same flows on a different console, so it is the place to compare how heartbeat, closed sessions and trophies are supposed to behave.
-- gwm-stats-ios — SwiftUI app that reads the server's public API; it never writes to ingest.
+- [ios-app](https://github.com/gowithme-club/ios-app) (formerly gwm-stats-ios) — SwiftUI app that reads the server's public API; it never writes to ingest.
 
 ## Documents and language
 
@@ -72,3 +72,9 @@ What the plugin leaves on the console:
 ## Workflow
 
 Commits land straight on `main`; the history has no merge commits.
+
+## Brand
+
+The product is **gowithme.club**: lowercase, never shortened to "gowithme"; `GWM` names only the friends' group. The descriptor, the slogan and how to write them live in the server repository, in [`src/public/brand.js`](https://github.com/gowithme-club/server/blob/main/src/public/brand.js) and [DESIGN.md, "Голос"](https://github.com/gowithme-club/server/blob/main/DESIGN.md#голос), with [the list of every text shown outside the site](https://github.com/gowithme-club/server/blob/main/DESIGN.md#тексты-вне-сайта). Reuse that wording rather than writing a variant; when a text listed there changes here, update the list.
+
+The status screen's title `GWM Stats` predates this and stays until the owner decides otherwise: renaming touches installed copies and their config paths.
