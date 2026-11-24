@@ -77,4 +77,4 @@ Commits land straight on `main`; the history has no merge commits.
 
 The product is **gowithme.club**: lowercase, never shortened to "gowithme"; `GWM` names only the friends' group. The descriptor, the slogan and how to write them live in the server repository, in [`src/public/brand.js`](https://github.com/gowithme-club/server/blob/main/src/public/brand.js) and [DESIGN.md, "Голос"](https://github.com/gowithme-club/server/blob/main/DESIGN.md#голос), with [the list of every text shown outside the site](https://github.com/gowithme-club/server/blob/main/DESIGN.md#тексты-вне-сайта). Reuse that wording rather than writing a variant; when a text listed there changes here, update the list.
 
-The status screen's title `GWM Stats` predates this and stays until the owner decides otherwise: renaming touches installed copies and their config paths.
+On the console the app is `gowithme.club` too: the XMB title in `app/Makefile`, the status screen's heading in `app/source/main.cpp`, the icon in `app/icon0.svg`. `APPID` `GWMSTATS0` and the `gwm` paths stay: a new title id would install a second app beside the old one, and new paths would orphan installed configs.

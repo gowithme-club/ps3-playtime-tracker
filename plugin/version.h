@@ -9,6 +9,6 @@
 #ifndef GWM_VERSION_H
 #define GWM_VERSION_H
 
-#define GWM_VERSION "1.0.0"
+#define GWM_VERSION "1.0.1"
 
 #endif /* GWM_VERSION_H */

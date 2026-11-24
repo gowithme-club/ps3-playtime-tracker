@@ -51,11 +51,11 @@ INCLUDES	:=	include
 VERSION		:=	$(shell sed -n 's/.*GWM_VERSION "\(.*\)".*/\1/p' \
 			$(dir $(firstword $(MAKEFILE_LIST)))../plugin/version.h)
 
-TITLE		:=	GWM Stats $(VERSION)
+TITLE		:=	gowithme.club $(VERSION)
 APPID		:=	GWMSTATS0
 CONTENTID	:=	UP0001-$(APPID)_00-0000000000000000
-# ICON0.PNG — 320×176, фирменный знак сервиса из gwm-stats/src/public/favicon.svg
-# (маджента #FF3AEB, белый «GWM» с подчёркиванием). Исходник лежит рядом,
+# ICON0.PNG — 320×176, знак gowithme.club (лаймовый геймпад-«w» из
+# server/src/public/brand/w-gamepad.svg на тёмном квадрате). Исходник лежит рядом,
 # в icon0.svg; PNG пересобирается из него так:
 #
 #   { echo '<html><head><style>html,body{margin:0;background:transparent}</style>\

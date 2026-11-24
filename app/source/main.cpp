@@ -517,7 +517,7 @@ int main(void)
 			logf("кадр 1: фон и прямоугольник нарисованы");
 		}
 
-		font.Printf(left, top, COLOR_WHITE, size_h, "GWM Stats");
+		font.Printf(left, top, COLOR_WHITE, size_h, "gowithme.club");
 
 		if(frame == 0)
 		{
