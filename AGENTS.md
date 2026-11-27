@@ -20,7 +20,7 @@ This plugin is one client of a server that owns all the domain logic — dedup, 
 
 ## Documents and language
 
-`README.md` (English) and `README.ru.md` are the short public pages for people installing the plugin — keep them in step with each other and with the site's setup guide. `docs/DEVELOPMENT.ru.md` is in Russian and is where the reasoning lives — what was measured on the console, what was rejected and why. Read the relevant section before changing behaviour it describes, and update it in the same commit. `CHANGELOG.md` records every version that was verified on a live console; `docs/INSTALL.md` is the install procedure. Code comments and commit messages in this repository are Russian.
+`README.md` (English) and `README.ru.md` are the short public pages for people installing the plugin — keep them in step with each other and with the site's setup guide. `docs/DEVELOPMENT.ru.md` is in Russian and is where the reasoning lives — what was measured on the console, what was rejected and why. Read the relevant section before changing behaviour it describes, and update it in the same commit. `CHANGELOG.md` records every version that was verified on a live console; `docs/INSTALL.md` is the install procedure. Code comments in this repository are Russian; commit messages are English.
 
 ## Build
 
