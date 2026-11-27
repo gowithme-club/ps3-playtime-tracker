@@ -14,7 +14,7 @@ Alongside it, `app/` is an ordinary homebrew status screen (PSL1GHT, packaged as
 
 This plugin is one client of a server that owns all the domain logic — dedup, sessions, trophies, live status, dashboard. A client only forwards events over the ingest API; anything that changes server behaviour or the contract itself belongs in gwm-stats, not here.
 
-- [server](https://github.com/gowithme-club/server) (formerly gwm-stats) — ingest endpoints, web dashboard, public read API. The contract is `docs/ingest-api-v1.md`, with a client-author version at `docs/ingest-api-v1-client.md`.
+- [server](https://github.com/gowithme-club/server) (formerly gwm-stats) — ingest endpoints, web dashboard, public read API. The contract is its [`docs/ingest-api-v1.md`](https://github.com/gowithme-club/server/blob/main/docs/ingest-api-v1.md), with a client-author version at [`docs/ingest-api-v1-client.md`](https://github.com/gowithme-club/server/blob/main/docs/ingest-api-v1-client.md).
 - [switch-playtime-tracker](https://github.com/gowithme-club/switch-playtime-tracker) — Atmosphere sysmodule for a CFW Switch, a second client of the same ingest API. Same flows on a different console, so it is the place to compare how heartbeat, closed sessions and trophies are supposed to behave.
 - [ios-app](https://github.com/gowithme-club/ios-app) (formerly gwm-stats-ios) — SwiftUI app that reads the server's public API; it never writes to ingest.
 
